@@ -1,24 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Text, Container, Grid, Card, Table, Title, Group, Flex } from '@mantine/core';
 import AppLayout from '../Layouts/AppLayout';
-import { Bar } from 'recharts';
 import { BarChart } from '@mantine/charts';
 import { MonthPickerInput } from '@mantine/dates';
 import dayjs from 'dayjs';
 
 export default function Home(props) {
     const data = props.data;
+
+    // Menginisialisasi defaultMonthYear dengan pengecekan validitas tanggal
     const defaultMonthYear = props.monthYear
-        ? dayjs(props.monthYear, 'MMMM YYYY').toDate()
+        ? dayjs(props.monthYear, 'MMMM YYYY').isValid()
+            ? dayjs(props.monthYear, 'MMMM YYYY').toDate()
+            : new Date()
         : new Date();
+
     const month = new Date().toLocaleString('default', { month: 'long' });
-    // monthYear is default monthFilter
+
+    // Initial month filter state
     const [monthFilter, setMonthFilter] = useState(defaultMonthYear);
+
+    // Chart data mapping
     const chartData = data.map((element) => ({
         item: element.assembly_line, // Assembly line sebagai label
         'BTS %': element.bts ?? 0, // BTS % sebagai nilai
         color: 'blue', // Warna bar
     }));
+
+    // Table rows mapping
     const rows = data.map((element, index) => (
         <Table.Tr key={element.id}>
             <Table.Td>{element.assembly_line}</Table.Td>
@@ -29,15 +38,21 @@ export default function Home(props) {
             <Table.Td>{element.volume ?? 0} %</Table.Td>
             <Table.Td>{element.bts ?? 0} %</Table.Td>
         </Table.Tr>
-    ))
+    ));
+
+    // Handle month change event
     const handleMonthChange = (value) => {
-        setMonthFilter(value);
+        // Validasi jika value adalah Date yang valid
         if (value instanceof Date && !isNaN(value)) {
+            setMonthFilter(value);
             const formattedMonthYear = value.toLocaleString('default', { month: 'long' }) + ' ' + value.getFullYear();
-            // Redirect to dashboard with the selected month_year
+            // Redirect ke halaman dashboard dengan month_year yang dipilih
             window.location.href = `/dashboard?month_year=${formattedMonthYear}`;
+        } else {
+            console.error("Invalid date selected:", value);
         }
     };
+
     return (
         <AppLayout>
             <h1>Dashboard</h1>
@@ -54,11 +69,11 @@ export default function Home(props) {
                             clearable
                             w={400}
                             radius={'md'}
-                            onc
                         />
                     </Flex>
                 </Card.Section>
             </Card>
+
             <Grid>
                 <Grid.Col span={6}>
                     <Card withBorder shadow="sm" radius="md" mb={20}>
@@ -81,6 +96,7 @@ export default function Home(props) {
                         </Card.Section>
                     </Card>
                 </Grid.Col>
+
                 <Grid.Col span={6}>
                     <Card withBorder shadow="sm" radius="md" mb={20}>
                         <Title m={5} order={3} align="center">Charts</Title>
