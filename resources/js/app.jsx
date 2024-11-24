@@ -3,8 +3,15 @@ import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import '@mantine/dates/styles.css';
+import '@mantine/notifications/styles.css';
+import { Notifications } from '@mantine/notifications';
 createInertiaApp({
-    resolve: name => import(`./Pages/${name}.jsx`),
+    progress: {
+        color: '#29d',
+      },
+    resolve: name => resolvePageComponent(`./Pages/${name}.jsx`, import.meta.glob('./Pages/**/*.jsx')),
     setup({ el, App, props }) {
         const root = createRoot(el);
         root.render(
@@ -12,8 +19,22 @@ createInertiaApp({
                 withGlobalStyles
                 withNormalizeCSS
             >
+            <Notifications />
                 <App {...props} />
             </MantineProvider>
         );
     },
 });
+
+// import React from 'react';
+// import { render } from 'react-dom';
+// import { createInertiaApp  } from '@inertiajs/react';
+// import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+
+// createInertiaApp({
+//     resolve: (name) => resolvePageComponent(`./Pages/${name}.jsx`, import.meta.glob('./Pages/**/*.jsx')),
+//     setup({ el, App, props }) {
+//         return render(<App {...props} />, el);
+//     },
+// });
+
