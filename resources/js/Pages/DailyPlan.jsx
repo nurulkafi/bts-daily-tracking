@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { Button, Text, Container, Table, Title, Box, Group, Collapse, TextInput, Select, Pagination, Card } from '@mantine/core';
 import AppLayout from '../Layouts/AppLayout';
 import { useDisclosure } from '@mantine/hooks';
-import { DatePickerInput } from '@mantine/dates';
+import { DatePickerInput, MonthPickerInput } from '@mantine/dates';
 
 export default function DailyPlan(props) {
 
     const [dateFilter, setDateFilter] = useState(null);
     const [assemblyLineFilter, setAssemblyLineFilter] = useState('');
+    const [monthFilter, setMonthFilter] = useState(null);
     const [poFilter, setPoFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;  // Adjust the number of items per page here
@@ -19,7 +20,11 @@ export default function DailyPlan(props) {
         const isDateMatch = dateFilter ? new Date(element.date).toDateString() === new Date(dateFilter).toDateString() : true;
         const isAssemblyLineMatch = assemblyLineFilter ? element.assembly_line === assemblyLineFilter : true;
         const isPoMatch = poFilter ? element.po === poFilter : true;
-        return isDateMatch && isAssemblyLineMatch && isPoMatch;
+        const isMonthMatch = monthFilter
+            ? new Date(element.date).getMonth() === new Date(monthFilter).getMonth() &&
+            new Date(element.date).getFullYear() === new Date(monthFilter).getFullYear()
+            : true;
+        return isDateMatch && isMonthMatch && isAssemblyLineMatch && isPoMatch;
     });
 
     // Calculate the slice of data to be shown on the current page
@@ -55,6 +60,8 @@ export default function DailyPlan(props) {
         }
     };
 
+
+
     return (
         <AppLayout>
             <Group mb={20} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -72,13 +79,23 @@ export default function DailyPlan(props) {
                 <Card.Section withBorder inheritPadding py="md">
                     <Title order={3}>Filters Data</Title>
                     <Group mt={10} mb={10} justify='flex-start'>
-                        <DatePickerInput
+                        {/* <DatePickerInput
                             value={dateFilter}
                             onChange={setDateFilter}
                             label="Filter by Date"
                             placeholder="Pick a date"
                             clearable
                             radius={"md"}
+                        /> */}
+                        <MonthPickerInput
+                            label="Filter by Month"
+                            placeholder="Select Month"
+                            value={monthFilter}
+                            onChange={(value) => setMonthFilter(value)}
+                            clearable
+                            w={200}
+                            radius={'md'}
+                            onc
                         />
                         <Select
                             value={assemblyLineFilter}
@@ -105,7 +122,7 @@ export default function DailyPlan(props) {
             <Card withBorder shadow="sm" radius="md">
                 <Card.Section withBorder inheritPadding py="md">
                     <Group mt={10} mb={10} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Title order={3}>Daily Plan Data</Title>
+                        <Title order={3}>Daily Plan Data</Title>
                         <Pagination
                             page={currentPage}
                             total={totalPages}
@@ -126,7 +143,17 @@ export default function DailyPlan(props) {
                                 <Table.Th>Total PRS</Table.Th>
                             </Table.Tr>
                         </Table.Thead>
-                        <Table.Tbody>{rows}</Table.Tbody>
+                        <Table.Tbody>
+                            {filteredData.length > 0 ? (
+                                rows
+                            ) : (
+                                <Table.Tr>
+                                    <Table.Td colSpan={7} style={{ textAlign: 'center', color: 'gray' }}>
+                                        Data Not Found
+                                    </Table.Td>
+                                </Table.Tr>
+                            )}
+                        </Table.Tbody>
                     </Table>
                 </Card.Section>
             </Card>

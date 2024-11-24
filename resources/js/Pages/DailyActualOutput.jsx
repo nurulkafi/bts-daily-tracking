@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { Button, Text, Container, Table, Title, Box, Group, Collapse, TextInput, Select, Pagination, Card, Badge, Modal } from '@mantine/core';
 import AppLayout from '../Layouts/AppLayout';
 import { useDisclosure } from '@mantine/hooks';
-import { DatePickerInput } from '@mantine/dates';
+import { DatePickerInput, MonthPickerInput } from '@mantine/dates';
 import { IconXboxA, IconXboxX } from '@tabler/icons-react';
 
 export default function DailyActualOutput(props) {
 
     const [dateFilter, setDateFilter] = useState(null);
+    const [monthFilter, setMonthFilter] = useState(null);
     const [opened, { open, close }] = useDisclosure(false);
     const [assemblyLineFilter, setAssemblyLineFilter] = useState('');
     const [poFilter, setPoFilter] = useState('');
@@ -19,9 +20,13 @@ export default function DailyActualOutput(props) {
     // Filter data based on selected date and assembly line
     const filteredData = dailyPlanData.filter((element) => {
         const isDateMatch = dateFilter ? new Date(element.date).toDateString() === new Date(dateFilter).toDateString() : true;
+        const isMonthMatch = monthFilter
+            ? new Date(element.date).getMonth() === new Date(monthFilter).getMonth() &&
+            new Date(element.date).getFullYear() === new Date(monthFilter).getFullYear()
+            : true;
         const isAssemblyLineMatch = assemblyLineFilter ? element.assembly_line === assemblyLineFilter : true;
         const isPoMatch = poFilter ? element.po === poFilter : true;
-        return isDateMatch && isAssemblyLineMatch && isPoMatch;
+        return isDateMatch && isMonthMatch && isAssemblyLineMatch && isPoMatch;
     });
 
     const calculateMixMatching = (totalPrsDaily, totalPrsOutput) => {
@@ -112,13 +117,14 @@ export default function DailyActualOutput(props) {
                     radius={"md"}
                     label="Filter by Assembly Line"
                 />
-                <DatePickerInput
-                    value={dateFilter}
-                    onChange={setDateFilter}
-                    label="Filter by Date"
-                    placeholder="Pick a date"
+                <MonthPickerInput
+                    label="Filter by Month"
+                    placeholder="Select month"
+                    value={monthFilter}
+                    onChange={(value) => setMonthFilter(value)}
                     clearable
-                    radius={"md"}
+                    radius={'md'}
+                    onc
                 />
                 <Select
                     value={poFilter}
@@ -171,13 +177,23 @@ export default function DailyActualOutput(props) {
                 <Card.Section withBorder inheritPadding py="md">
                     <Title order={3}>Filters Data</Title>
                     <Group mt={10} mb={10} justify='flex-start'>
-                        <DatePickerInput
+                        {/* <DatePickerInput
                             value={dateFilter}
                             onChange={setDateFilter}
                             label="Filter by Date"
                             placeholder="Pick a date"
                             clearable
                             radius={"md"}
+                        /> */}
+                        <MonthPickerInput
+                            label="Filter by Month"
+                            placeholder="Select Month"
+                            value={monthFilter}
+                            onChange={(value) => setMonthFilter(value)}
+                            clearable
+                            w={200}
+                            radius={'md'}
+                            onc
                         />
                         <Select
                             value={assemblyLineFilter}
@@ -249,7 +265,15 @@ export default function DailyActualOutput(props) {
                             </Table.Tr>
                         </Table.Thead>
                         <Table.Tbody>
-                            {rows}
+                            {filteredData.length > 0 ? (
+                                rows
+                            ) : (
+                                <Table.Tr>
+                                    <Table.Td colSpan={13} style={{ textAlign: 'center', color: 'gray' }}>
+                                        Data Not Found
+                                    </Table.Td>
+                                </Table.Tr>
+                            )}
                         </Table.Tbody>
                     </Table>
                 </Card.Section>
