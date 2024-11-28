@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Button, Text, Container, Table, Title, Box, Group, Collapse, TextInput, Select, Pagination, Card } from '@mantine/core';
+import { Button, Text, Container, Table, Title, Box, Group, Collapse, TextInput, Select, Pagination, Card ,ActionIcon} from '@mantine/core';
 import AppLayout from '../Layouts/AppLayout';
+import { notifications } from '@mantine/notifications';
 import { useDisclosure } from '@mantine/hooks';
+import { IconCheck, IconDeviceFloppy, IconTrash, IconX } from "@tabler/icons-react";
 import { DatePickerInput, MonthPickerInput } from '@mantine/dates';
 
 export default function DailyPlan(props) {
@@ -41,9 +43,84 @@ export default function DailyPlan(props) {
             <Table.Td>{element.po}</Table.Td>
             <Table.Td>{element.size}</Table.Td>
             <Table.Td>{element.total_prs}</Table.Td>
+            <Table.Td>
+            <ActionIcon color="red" onClick={() => handleDelete(element.id)}>
+                    <IconTrash style={{ width: "70%", height: "70%" }} stroke={1.5} />
+            </ActionIcon>
+        </Table.Td>
         </Table.Tr>
     ));
 
+ const handleDelete = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
+    if (!confirmDelete) return;
+
+    // Show loading notification
+    const loadingId = notifications.show({
+        title: "Deleting...",
+        message: "Please wait while we delete the data.",
+        color: "blue",
+        loading: true,
+        position: "top-right",
+        autoClose: false,
+        withCloseButton: false,
+    });
+
+    try {
+        const response = await fetch(`http://localhost:8000/api/daily-plans/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            // Update notification to show success
+            notifications.update({
+                id: loadingId,
+                title: "Success",
+                message: "Data deleted successfully!",
+                color: "green",
+                icon: <IconCheck />,
+                loading: false,
+                autoClose: 3000,
+                position: "top-right",
+                withCloseButton: true,
+                onClose: () => {
+                    window.location.href = "/daily-plan"; // Redirect after success
+                },
+            });
+        } else {
+            const error = await response.json();
+            // Update notification to show failure
+            notifications.update({
+                id: loadingId,
+                title: "Failed",
+                message: `Failed to delete data`,
+                color: "red",
+                icon: <IconX />,
+                loading: false,
+                autoClose: 3000,
+                position: "top-right",
+                withCloseButton: true,
+            });
+        }
+    } catch (error) {
+        // Show error notification in case of network failure
+        notifications.update({
+            id: loadingId,
+            title: "Failed",
+            message: `Error deleting data`,
+            color: "red",
+            icon: <IconX />,
+            loading: false,
+            autoClose: 3000,
+            position: "top-right",
+            withCloseButton: true,
+        });
+    }
+};
     // Get unique assembly lines for the Select options
     const assemblyLines = [...new Set(dailyPlanData.map((element) => element.assembly_line))];
 
@@ -141,6 +218,7 @@ export default function DailyPlan(props) {
                                 <Table.Th>PO</Table.Th>
                                 <Table.Th>Size</Table.Th>
                                 <Table.Th>Total PRS</Table.Th>
+                                <Table.Th>Delete</Table.Th>
                             </Table.Tr>
                         </Table.Thead>
                         <Table.Tbody>

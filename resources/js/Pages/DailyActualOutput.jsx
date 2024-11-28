@@ -262,6 +262,7 @@ export default function DailyActualOutput(props) {
                                 <Table.Th>Mix %</Table.Th>
                                 <Table.Th>Volume %</Table.Th>
                                 <Table.Th>BTS %</Table.Th>
+                                <Table.Th>Udate</Table.Th>
                             </Table.Tr>
                         </Table.Thead>
                         <Table.Tbody>

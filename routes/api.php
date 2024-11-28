@@ -18,5 +18,6 @@ Route::middleware([
     HandleCors::class,
 ])->group(function () {
     Route::post('/daily-plans', [DailyPlanController::class, 'store']);
+    Route::delete('/daily-plans/{id}', [DailyPlanController::class, 'destroy']);
     Route::post('/daily-actual-outputs', [DailyActualOutputController::class, 'store']);
 });

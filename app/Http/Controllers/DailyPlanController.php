@@ -40,7 +40,7 @@ class DailyPlanController extends Controller
             'items.*.factory' => 'required|string|max:255',
             'items.*.assembly_line' => 'required|string|max:255',
             'items.*.po' => 'required|string|max:255',
-            'items.*.size' => 'required|integer|min:0',
+            'items.*.size' => 'required|numeric|min:0',
             'items.*.total_prs' => 'required|integer|min:0',
         ]);
 
@@ -83,8 +83,19 @@ class DailyPlanController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        $dailyPlan = DailyPlan::find($id);
+    
+        if (!$dailyPlan) {
+            return response()->json(['message' => 'Data not found'], 404);
+        }
+    
+        try {
+            $dailyPlan->delete();
+            return response()->json(['message' => 'Data deleted successfully'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to delete data', 'error' => $e->getMessage()], 500);
+        }
     }
 }

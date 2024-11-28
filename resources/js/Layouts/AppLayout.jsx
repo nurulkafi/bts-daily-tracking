@@ -23,7 +23,7 @@ export default function AppLayout({ children }) {
               src="https://yt3.googleusercontent.com/v1N6ZLmSuhIzMDiRzu1fdgJP9Yhi1H687cyHOLEJ5OFFNGJzWeC6cxDWXp2bqOKlyiC0oEcIJg=s900-c-k-c0x00ffffff-no-rj"
             />
             <Text size="xl" weight={500}>
-              Daily Tracking Apps
+              Build To Schedule MPI
             </Text>
           </Group>
         </Group>
