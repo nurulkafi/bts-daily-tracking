@@ -18,6 +18,7 @@ class DailyActualOutputController extends Controller
         $data = DailyPlan::leftJoin('daily_actual_output', 'daily_plan.id', '=', 'daily_actual_output.daily_plan_id')
             ->select('daily_plan.*', 'daily_actual_output.total_prs as total_prs_output')
             ->orderBy('daily_plan.assembly_line')
+            ->orderBy('daily_plan.date','asc')
             ->orderBy('daily_plan.created_at')
             ->get();
 

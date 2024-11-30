@@ -24,6 +24,7 @@ Route::middleware([
     Route::get('/daily-plan', [DailyPlanController::class, 'index']);
     Route::get('/daily-plan/create', [DailyPlanController::class, 'create']);
 
+
     Route::get('/daily-actual-output', [DailyActualOutputController::class, 'index']);
     Route::get('/daily-actual-output/create', [DailyActualOutputController::class, 'create']);
 

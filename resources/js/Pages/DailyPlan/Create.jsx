@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionIcon, Button, Card, CardSection, Group, NumberInput, Table, TextInput, Title } from "@mantine/core";
+import { ActionIcon, Button, Card, CardSection, Group, NumberInput, Select, Table, TextInput, Title } from "@mantine/core";
 import AppLayout from "../../Layouts/AppLayout";
 import { DatePickerInput } from "@mantine/dates";
 import { IconCheck, IconDeviceFloppy, IconTrash, IconX } from "@tabler/icons-react";
@@ -17,7 +17,7 @@ export default function Create() {
             date: null,
             factory: "",
             assemblyLine: "",
-            po: "",
+            po: "", 
             size: null,
             totalPrs: null,
         };
@@ -120,7 +120,7 @@ export default function Create() {
                 </CardSection>
                 <CardSection withBorder inheritPadding py="md">
                     <Group mb={20} mt={20} justify="space-between">
-                        <Button onClick={addRow} leftSection={<IconDeviceFloppy size={16} />} radius={"md"} color="green">
+                        <Button onClick={addRow} leftSection={<IconDeviceFloppy size={16} />} radius="md" color="Blue">
                             Add New Item
                         </Button>
                     </Group>
@@ -155,25 +155,28 @@ export default function Create() {
                                         />
                                     </Table.Th>
                                     <Table.Th>
-                                        <TextInput
-                                            clearable
+                                        <Select searchable
+                                            data={['MPI', 'UNI']}
                                             value={row.factory}
-                                            onChange={(event) => {
+                                            onChange={(select) => {
                                                 const updatedRows = [...rows];
-                                                updatedRows[index].factory = event.target.value;
+                                                updatedRows[index].factory = select;
                                                 setRows(updatedRows);
                                             }}
+                                            clearable
                                             radius="md"
                                         />
                                     </Table.Th>
                                     <Table.Th>
-                                        <TextInput
+                                        <Select searchable
+                                         data={['A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A08', 'A09', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15', 'A16', 'A17', 'A18', 'A19', 'A20', 'A21', 'A22']}
                                             value={row.assemblyLine}
-                                            onChange={(event) => {
+                                            onChange={(select) => {
                                                 const updatedRows = [...rows];
-                                                updatedRows[index].assemblyLine = event.target.value;
+                                                updatedRows[index].assemblyLine = select;
                                                 setRows(updatedRows);
                                             }}
+                                            clearable
                                             radius="md"
                                         />
                                     </Table.Th>
