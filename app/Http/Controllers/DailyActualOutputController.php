@@ -18,7 +18,7 @@ class DailyActualOutputController extends Controller
         $data = DailyPlan::leftJoin('daily_actual_output', 'daily_plan.id', '=', 'daily_actual_output.daily_plan_id')
             ->select('daily_plan.*', 'daily_actual_output.total_prs as total_prs_output')
             ->orderBy('daily_plan.assembly_line')
-            ->orderBy('daily_plan.date','asc')
+            ->orderBy('daily_plan.date', 'asc')
             ->orderBy('daily_plan.created_at')
             ->get();
 
@@ -34,6 +34,7 @@ class DailyActualOutputController extends Controller
         $assemblyLineFilter = request('assembly_line');
         $dateFilter = request('date');
         $poFilter = request('po');
+        $monthYear = request('month');
 
         // Start the query
         $query = DailyPlan::leftJoin('daily_actual_output', 'daily_plan.id', '=', 'daily_actual_output.daily_plan_id')
@@ -54,6 +55,16 @@ class DailyActualOutputController extends Controller
         if (!empty($poFilter)) {
             $query->where('daily_plan.po', $poFilter);
         }
+
+        // GET MONTH AND YEAR (month year (november 2023))
+        if (!empty($monthYear)) {
+            $monthYear = date('F Y');
+            // Filter by month and year
+            $query->whereMonth('daily_plan.date', '=', date('m', strtotime($monthYear)));
+            $query->whereYear('daily_plan.date', '=', date('Y', strtotime($monthYear)));
+        }
+
+
 
         // Execute the query and get the results
         $data = $query->orderBy('daily_plan.created_at')->get();

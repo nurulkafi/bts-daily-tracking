@@ -149,6 +149,9 @@ export default function DailyActualOutput(props) {
                             if (poFilter) {
                                 params.append('po', poFilter);
                             }
+                            if (monthFilter) {
+                                params.append('month', monthFilter.toLocaleString('default', { month: 'long' }) + ' ' + monthFilter.getFullYear());
+                            }
 
                             const redirectUrl = '/daily-actual-output/create' + (params.toString() ? `?${params.toString()}` : '');
                             window.location.href = redirectUrl;

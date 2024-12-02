@@ -2,8 +2,9 @@ import { useState } from "react";
 import { ActionIcon, Button, Card, CardSection, Group, NumberInput, Select, Table, TextInput, Title } from "@mantine/core";
 import AppLayout from "../../Layouts/AppLayout";
 import { DatePickerInput } from "@mantine/dates";
-import { IconCheck, IconDeviceFloppy, IconTrash, IconX } from "@tabler/icons-react";
+import { IconCheck, IconDeviceFloppy, IconFileExcel, IconTrash, IconX } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
+import * as XLSX from "xlsx";
 export default function Create() {
     // State untuk menyimpan baris tabel
     const [rows, setRows] = useState([
@@ -17,7 +18,7 @@ export default function Create() {
             date: null,
             factory: "",
             assemblyLine: "",
-            po: "", 
+            po: "",
             size: null,
             totalPrs: null,
         };
@@ -111,7 +112,37 @@ export default function Create() {
             })
         }
     };
+ // Fungsi untuk membaca file Excel
+ const handleImportExcel = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
 
+    reader.onload = (event) => {
+        const binaryStr = event.target.result;
+        const workbook = XLSX.read(binaryStr, { type: "binary" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+
+        // Konversi sheet menjadi JSON
+        const data = XLSX.utils.sheet_to_json(sheet);
+        console.log(data);
+
+        // Konversi data ke dalam format state rows
+        const importedRows = data.map((row, index) => ({
+            id: index + 1,
+            date: row["Date (YYYY-MM-DD)"] ? new Date(row["Date (YYYY-MM-DD)"]) : null,
+            factory: row["Factory (e.g., MPI, UNI)"] || "",
+            assemblyLine: row["Assembly Line (e.g., A01, A02)"] || "",
+            po: row["PO (e.g., PO12345)"] || "",
+            size: row["Size (Mix)"] || null,
+            totalPrs: row["Total PRs"] || null,
+        }));
+
+        setRows(importedRows);
+    };
+
+    reader.readAsBinaryString(file);
+};
     return (
         <AppLayout>
             <Card shadow="sm" padding="lg" radius="md" withBorder>
@@ -119,9 +150,30 @@ export default function Create() {
                     <Title order={2}>Create Daily Plan</Title>
                 </CardSection>
                 <CardSection withBorder inheritPadding py="md">
-                    <Group mb={20} mt={20} justify="space-between">
+                    <Group mb={20} mt={20}>
                         <Button onClick={addRow} leftSection={<IconDeviceFloppy size={16} />} radius="md" color="Blue">
                             Add New Item
+                        </Button>
+                    </Group>
+                    <Group mb={20} mt={20}>
+                        <Button
+                            leftSection={<IconFileExcel size={16} />}
+                            radius="md"
+                            color="lime"
+                            onClick={() => {
+                                window.location.href = "http://localhost:8000/api/daily-plan/template";
+                            }}
+                        >
+                            Download Template
+                        </Button>
+                        <Button component="label" leftSection={<IconFileExcel size={16} />} radius="md" color="green">
+                            Import Data Excel
+                            <input
+                                type="file"
+                                accept=".xlsx, .xls"
+                                onChange={handleImportExcel}
+                                hidden
+                            />
                         </Button>
                     </Group>
                     <Table striped withTableBorder withColumnBorders mt={10}>
@@ -169,7 +221,7 @@ export default function Create() {
                                     </Table.Th>
                                     <Table.Th>
                                         <Select searchable
-                                         data={['A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A08', 'A09', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15', 'A16', 'A17', 'A18', 'A19', 'A20', 'A21', 'A22']}
+                                            data={['A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A08', 'A09', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15', 'A16', 'A17', 'A18', 'A19', 'A20', 'A21', 'A22']}
                                             value={row.assemblyLine}
                                             onChange={(select) => {
                                                 const updatedRows = [...rows];

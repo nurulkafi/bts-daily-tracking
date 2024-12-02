@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DailyPlan;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-
+use Maatwebsite\Excel\Facades\Excel;
 class DailyPlanController extends Controller
 {
     /**
@@ -86,16 +86,46 @@ class DailyPlanController extends Controller
     public function destroy($id)
     {
         $dailyPlan = DailyPlan::find($id);
-    
+
         if (!$dailyPlan) {
             return response()->json(['message' => 'Data not found'], 404);
         }
-    
+
         try {
             $dailyPlan->delete();
             return response()->json(['message' => 'Data deleted successfully'], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to delete data', 'error' => $e->getMessage()], 500);
         }
+    }
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ]);
+
+        $path = $request->file('file')->getRealPath();
+        $data = Excel::toArray([], $path);
+
+        // Ambil data dari sheet pertama
+        $sheetData = $data[0] ?? [];
+
+        // Hapus header (baris pertama)
+        array_shift($sheetData);
+
+        // Format data menjadi JSON
+        $formattedData = array_map(function ($row, $index) {
+            return [
+                'id' => $index + 1,
+                'date' => $row[0] ?? null,
+                'factory' => $row[1] ?? '',
+                'assemblyLine' => $row[2] ?? '',
+                'po' => $row[3] ?? '',
+                'size' => isset($row[4]) ? (int) $row[4] : null,
+                'totalPrs' => isset($row[5]) ? (int) $row[5] : null,
+            ];
+        }, $sheetData, array_keys($sheetData));
+
+        return response()->json($formattedData);
     }
 }
