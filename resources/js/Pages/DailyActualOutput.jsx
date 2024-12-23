@@ -3,7 +3,7 @@ import { Button, Text, Container, Table, Title, Box, Group, Collapse, TextInput,
 import AppLayout from '../Layouts/AppLayout';
 import { useDisclosure } from '@mantine/hooks';
 import { DatePickerInput, MonthPickerInput } from '@mantine/dates';
-import { IconXboxA, IconXboxX } from '@tabler/icons-react';
+import { IconFileExcel, IconXboxA, IconXboxX } from '@tabler/icons-react';
 
 export default function DailyActualOutput(props) {
 
@@ -216,7 +216,9 @@ export default function DailyActualOutput(props) {
                             clearable
                             radius={"md"}
                         />
+
                     </Group>
+
                 </Card.Section>
             </Card>
 
@@ -224,6 +226,7 @@ export default function DailyActualOutput(props) {
                 <Card.Section withBorder inheritPadding py="md">
                     <Group mt={10} mb={10} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Title order={3}>Daily Plan Data</Title>
+
                         <Pagination
                             page={currentPage}
                             total={totalPages}
@@ -232,6 +235,32 @@ export default function DailyActualOutput(props) {
                             color='teal'
                         />
                     </Group>
+                    <Button
+                            onClick={() => {
+                                const params = new URLSearchParams();
+
+                                if (assemblyLineFilter) {
+                                    params.append('assembly_line', assemblyLineFilter);
+                                }
+                                if (dateFilter) {
+                                    params.append('date', dateFilter);
+                                }
+                                if (poFilter) {
+                                    params.append('po', poFilter);
+                                }
+                                if (monthFilter) {
+                                    params.append('month', monthFilter.toLocaleString('default', { month: 'long' }) + ' ' + monthFilter.getFullYear());
+                                }
+
+                                const redirectUrl = '/daily-actual-output/download_excel' + (params.toString() ? `?${params.toString()}` : '');
+                                window.location.href = redirectUrl;
+                            }}
+                            radius="md"
+                            color="teal"
+                            leftSection={<IconFileExcel size="1rem" stroke={1.5} />}
+                        >
+                            Download
+                        </Button>
                     <Table>
                         <Table.Thead>
                             {/* Header pertama untuk kategori utama */}

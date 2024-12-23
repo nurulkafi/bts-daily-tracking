@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\DailyPlanExport;
 use App\Models\DailyActualOutput;
 use App\Models\DailyPlan;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DailyActualOutputController extends Controller
 {
@@ -19,6 +21,8 @@ class DailyActualOutputController extends Controller
             ->select('daily_plan.*', 'daily_actual_output.total_prs as total_prs_output')
             ->orderBy('daily_plan.assembly_line')
             ->orderBy('daily_plan.date', 'asc')
+            ->orderBy('daily_plan.po', 'asc')
+            ->orderBy('daily_plan.size', 'asc')
             ->orderBy('daily_plan.created_at')
             ->get();
 
@@ -138,4 +142,111 @@ class DailyActualOutputController extends Controller
     {
         //
     }
+    public function download_excel(Request $request)
+    {
+        // Filter dari request
+        $assemblyLineFilter = $request->input('assembly_line');
+        $dateFilter = $request->input('date');
+        $poFilter = $request->input('po');
+        $monthYear = $request->input('month');
+
+        // Mulai query
+        $query = DailyPlan::leftJoin('daily_actual_output', 'daily_plan.id', '=', 'daily_actual_output.daily_plan_id')
+            ->select(
+                'daily_plan.*',
+                'daily_actual_output.total_prs as total_prs_output'
+            );
+
+        // Terapkan filter berdasarkan input parameter
+        if (!empty($assemblyLineFilter)) {
+            $query->where('daily_plan.assembly_line', $assemblyLineFilter);
+        }
+
+        if (!empty($dateFilter)) {
+            $query->whereDate('daily_plan.date', $dateFilter);
+        }
+
+        if (!empty($poFilter)) {
+            $query->where('daily_plan.po', $poFilter);
+        }
+
+        if (!empty($monthYear)) {
+            // Parse month and year
+            $month = date('m', strtotime($monthYear));
+            $year = date('Y', strtotime($monthYear));
+            $query->whereMonth('daily_plan.date', '=', $month);
+            $query->whereYear('daily_plan.date', '=', $year);
+        }
+
+        // Eksekusi query dan ambil hasil
+        $data = $query->orderBy('daily_plan.date', 'asc')->orderBy('daily_plan.po')->orderBy('daily_plan.size')->get();
+
+        // Hitung data untuk assembly line
+        $assemblyLineData = $this->calculateAssemblyLineData($assemblyLineFilter, $data);
+
+        // Lakukan proses download Excel di sini
+        // Misalnya, menggunakan Laravel Excel atau library lain
+
+        // Contoh: return response dengan data Excel
+        $datas = [];
+        foreach ($data as $item) {
+            $datas[] = [
+                'assembly_line' => $item->assembly_line,
+                'date' => $item->date,
+                'po' => $item->po,
+                'size' => $item->size,
+                'total_prs' => $item->total_prs,
+                'total_prs_output' => $item->total_prs_output,
+                'total_mix_prs' => $assemblyLineData['totalMixPrs'], // Mengambil dari hasil perhitungan
+                'mix_percentage' => $assemblyLineData['mixPercentage'], // Mengambil dari hasil perhitungan
+                'volume' => $assemblyLineData['volume'], // Mengambil dari hasil perhitungan
+                'bts' => $assemblyLineData['bts'], // Mengambil dari hasil perhitungan
+            ];
+        }
+        return Excel::download(new DailyPlanExport(collect($datas)), 'daily_plan_export.xlsx');
+    }
+
+    private function calculateAssemblyLineData($assemblyLine, $filteredData)
+    {
+        // Filter data berdasarkan assembly line
+        $lineData = $filteredData->filter(function ($item) use ($assemblyLine) {
+            return $item->assembly_line === $assemblyLine;
+        });
+
+        // Inisialisasi variabel untuk total
+        $totalMixPrs = 0;
+        $totalPrs = 0;
+        $totalPrsOutput = 0;
+
+        // Hitung totalMixPrs, totalPrs, dan totalPrsOutput
+        foreach ($lineData as $curr) {
+            $totalMixPrs += $this->calculateMixMatching($curr->total_prs, $curr->total_prs_output);
+            $totalPrs += $curr->total_prs;
+            $totalPrsOutput += $curr->total_prs_output;
+        }
+
+        // Hitung persentase mix dan volume
+        $mixPercentage = ($totalMixPrs && $totalPrsOutput) ? ($totalPrsOutput / $totalMixPrs) * 100 : 0;
+        $volume = $totalPrs ? ($totalPrsOutput / $totalPrs) * 100 : 0;
+        $bts = ($mixPercentage / 100) * ($volume / 100) * 100;
+
+        // Kembalikan hasil dalam bentuk array
+        return [
+            'totalMixPrs' => $totalMixPrs,
+            'mixPercentage' => $mixPercentage,
+            'volume' => $volume,
+            'bts' => $bts,
+        ];
+    }
+
+    // Contoh fungsi calculateMixMatching
+    private function calculateMixMatching($totalPrs, $totalPrsOutput)
+    {
+        // Implementasi logika untuk menghitung mix matching
+        return $totalPrsOutput; // Ganti dengan logika yang sesuai
+    }
+
+    /**
+     * Fungsi untuk menghitung data berdasarkan assembly_line
+     */
 }
