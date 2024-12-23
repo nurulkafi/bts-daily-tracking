@@ -71,7 +71,9 @@ class DailyActualOutputController extends Controller
 
 
         // Execute the query and get the results
-        $data = $query->orderBy('daily_plan.created_at')->get();
+        $data = $query->orderBy('daily_plan.date', 'asc')
+        ->orderBy('daily_plan.po', 'asc')
+        ->orderBy('daily_plan.size', 'asc')->get();
 
         return Inertia::render('DailyActualOutput/Create', ['data' => $data]);
     }
