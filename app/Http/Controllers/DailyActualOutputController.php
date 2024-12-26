@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\DailyPlanExport;
+use App\Exports\DailyActualExport;
 use App\Models\DailyActualOutput;
 use App\Models\DailyPlan;
 use Illuminate\Http\Request;
@@ -193,8 +194,8 @@ class DailyActualOutputController extends Controller
         $datas = [];
         foreach ($data as $item) {
             $datas[] = [
-                'assembly_line' => $item->assembly_line,
                 'date' => $item->date,
+                'assembly_line' => $item->assembly_line,
                 'po' => $item->po,
                 'size' => $item->size,
                 'total_prs' => $item->total_prs,
@@ -251,4 +252,92 @@ class DailyActualOutputController extends Controller
     /**
      * Fungsi untuk menghitung data berdasarkan assembly_line
      */
+
+     public function download_actual(Request $request)
+     {
+         // Filter dari request
+         $assemblyLineFilter = $request->input('assembly_line');
+         $dateFilter = $request->input('date');
+         $poFilter = $request->input('po');
+         $monthYear = $request->input('month');
+ 
+         // Mulai query
+         $query = DailyPlan::leftJoin('daily_actual_output', 'daily_plan.id', '=', 'daily_actual_output.daily_plan_id')
+             ->select(
+                 'daily_plan.*',
+                 'daily_actual_output.total_prs as total_prs_output'
+             );
+ 
+         // Terapkan filter berdasarkan input parameter
+         if (!empty($assemblyLineFilter)) {
+             $query->where('daily_plan.assembly_line', $assemblyLineFilter);
+         }
+ 
+         if (!empty($dateFilter)) {
+             $query->whereDate('daily_plan.date', $dateFilter);
+         }
+ 
+         if (!empty($poFilter)) {
+             $query->where('daily_plan.po', $poFilter);
+         }
+ 
+         if (!empty($monthYear)) {
+             // Parse month and year
+             $month = date('m', strtotime($monthYear));
+             $year = date('Y', strtotime($monthYear));
+             $query->whereMonth('daily_plan.date', '=', $month);
+             $query->whereYear('daily_plan.date', '=', $year);
+         }
+ 
+         // Eksekusi query dan ambil hasil
+         $data = $query->orderBy('daily_plan.date', 'asc')->orderBy('daily_plan.po')->orderBy('daily_plan.size')->get();
+ 
+         // Hitung data untuk assembly line
+         $assemblyLineData = $this->calculateAssemblyLineData($assemblyLineFilter, $data);
+ 
+         // Lakukan proses download Excel di sini
+         // Misalnya, menggunakan Laravel Excel atau library lain
+ 
+         // Contoh: return response dengan data Excel
+         $datas = [];
+         foreach ($data as $item) {
+             $datas[] = [
+                 'date' => $item->date,
+                 'assembly_line' => $item->assembly_line,
+                 'po' => $item->po,
+                 'size' => $item->size,
+                 'total_prs' => $item->total_prs,
+                 'total_prs_output' => $item->total_prs_output,
+             ];
+         }
+         return Excel::download(new DailyActualExport(collect($datas)), 'daily_actual_export.xlsx');
+     }
+
+     public function importExcel(Request $request)
+     {
+         $request->validate([
+             'file' => 'required|mimes:xlsx,xls,csv|max:2048',
+         ]);
+     
+         // Ambil file dari request
+         $path = $request->file('file')->getRealPath();
+         $data = Excel::toArray([], $path);
+     
+         // Ambil data dari sheet pertama
+         $sheetData = $data[0] ?? [];
+     
+         // Hapus header (baris pertama)
+         array_shift($sheetData);
+     
+         // Ambil hanya kolom Actual Output
+         $total_prs_output = array_map(function ($row) {
+             return isset($row[5]) ? (int) $row[5] : null; // Kolom Actual Output
+         }, $sheetData);
+     
+         // Format data ke bentuk JSON
+         return response()->json([
+             'total_prs_output' => $total_prs_output,
+         ]);
+     }
 }
+     

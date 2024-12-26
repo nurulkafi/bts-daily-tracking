@@ -19,6 +19,8 @@ import { notifications } from "@mantine/notifications";
 import { Head } from "@inertiajs/react";
 import { useDisclosure } from '@mantine/hooks';
 import { MonthPickerInput } from '@mantine/dates';
+import { IconFileExcel, IconXboxA, IconXboxX } from '@tabler/icons-react';
+import * as XLSX from "xlsx";
 
 export default function Create(props) {
 
@@ -170,8 +172,37 @@ export default function Create(props) {
         }
     };
 
+    const handleImportExcel = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const binaryStr = event.target.result;
+            const workbook = XLSX.read(binaryStr, { type: "binary" });
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
     
-
+            // Konversi sheet menjadi JSON
+            const importedData = XLSX.utils.sheet_to_json(sheet);
+    
+            // Ambil hanya data dari kolom "Total PRS Output"
+            const updatedData = importedData.map((row) => ({
+                total_prs_output: row["Total Prs_Output"], // pastikan nama kolom sesuai file Excel
+            }));
+    
+            setData(updatedData); // Update state dengan data yang diimpor
+            notifications.show({
+                title: "Import Successful",
+                message: "Data 'Total PRS Output' berhasil diimpor ke form!",
+                color: "green",
+                icon: <IconCheck />,
+                autoClose: 3000,
+                position: "top-right",
+            });
+        };
+        reader.readAsBinaryString(file);
+    };
+    
+    
     const totalMixPrs = calculateTotalMixPrs();
     const totalMixPercentage = calculateTotalMixPercentage(totalMixPrs);
     const volume = calculateVolume();
@@ -252,6 +283,41 @@ export default function Create(props) {
                             radius={'md'}
                             onc
                         />
+                         <Button
+                            onClick={() => {
+                                const params = new URLSearchParams();
+
+                                if (assemblyLineFilter) {
+                                    params.append('assembly_line', assemblyLineFilter);
+                                }
+                                if (dateFilter) {
+                                    params.append('date', dateFilter);
+                                }
+                                if (poFilter) {
+                                    params.append('po', poFilter);
+                                }
+                                if (monthFilter) {
+                                    params.append('month', monthFilter.toLocaleString('default', { month: 'long' }) + ' ' + monthFilter.getFullYear());
+                                }
+
+                                const redirectUrl = '/daily-actual-output/download_actual' + (params.toString() ? `?${params.toString()}` : '');
+                                window.location.href = redirectUrl;
+                            }}
+                            radius="md"
+                            color="teal"
+                            leftSection={<IconFileExcel size="1rem" stroke={1.5} />}
+                        >
+                            Download
+                        </Button>
+                        <Button component="label" leftSection={<IconFileExcel size={16} />} radius="md" color="green">
+                            Import Data Excel
+                            <input
+                                type="file"
+                                accept=".xlsx, .xls"
+                                onChange={handleImportExcel}
+                                hidden
+                            />
+                        </Button>
                     </Group>
                 </Card.Section>
             </Card>

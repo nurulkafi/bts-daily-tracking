@@ -13,7 +13,7 @@ use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class DailyPlanExport implements FromCollection, WithHeadings, WithStyles, WithEvents
+class DailyActualExport implements FromCollection, WithHeadings, WithStyles, WithEvents
 {
     private $data;
 
@@ -38,12 +38,7 @@ class DailyPlanExport implements FromCollection, WithHeadings, WithStyles, WithE
             'PO',
             'Size',
             'Total PRs',
-            'Total Output',
-            'Total Mix PRs',
-            'Mix Percentage',
-            'Volume',
-            'BTS',
-            // 'Created At',
+            'Total Prs_Output',
         ];
     }
 
@@ -73,7 +68,7 @@ class DailyPlanExport implements FromCollection, WithHeadings, WithStyles, WithE
         return [
             AfterSheet::class => function(AfterSheet $event) {
                 // Mengatur border untuk seluruh data
-                $event->sheet->getStyle('A1:J' . (count($this->data) + 1))->applyFromArray([
+                $event->sheet->getStyle('A1:F' . (count($this->data) + 1))->applyFromArray([
                     'borders' => [
                         'outline' => [
                             'borderStyle' => Border::BORDER_THIN,
@@ -87,16 +82,12 @@ class DailyPlanExport implements FromCollection, WithHeadings, WithStyles, WithE
                 ]);
 
                 // Menyesuaikan lebar kolom
-                $event->sheet->getColumnDimension('A')->setWidth(20); // Assembly Line
                 $event->sheet->getColumnDimension('B')->setWidth(15); // Date
+                $event->sheet->getColumnDimension('A')->setWidth(20); // Assembly Line
                 $event->sheet->getColumnDimension('C')->setWidth(20); // PO
                 $event->sheet->getColumnDimension('D')->setWidth(15); // Total PRs
                 $event->sheet->getColumnDimension('E')->setWidth(15); // Total Output
-                $event->sheet->getColumnDimension('F')->setWidth(15); // Total Mix PRs
-                $event->sheet->getColumnDimension('G')->setWidth(15); // Mix Percentage
-                $event->sheet->getColumnDimension('H')->setWidth(15); // Volume
-                $event->sheet->getColumnDimension('I')->setWidth(15); // BTS
-                $event->sheet->getColumnDimension('J')->setWidth(20); // Created At
+                $event->sheet->getColumnDimension('F')->setWidth(15); // Total Output
             },
         ];
     }

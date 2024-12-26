@@ -7,6 +7,7 @@ use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Exports\DailyPlanTemplateExport;
+use App\Exports\DailyActualTemplateExport;
 use Maatwebsite\Excel\Facades\Excel;
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -25,5 +26,11 @@ Route::middleware([
         return Excel::download(new DailyPlanTemplateExport, 'daily_plan_template.xlsx');
     });
     Route::post('/import-daily-plan', [DailyPlanController::class, 'importExcel']);
+
+    //actual
+    Route::get('/daily-actual-outputs/template', function () {
+        return Excel::download(new DailyActualTemplateExport, 'daily_actual_template.xlsx');
+    });
+    Route::post('/import-daily-actual-outputs', [DailyActualOutputController::class, 'importExcel']);
 
 });

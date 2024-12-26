@@ -28,6 +28,7 @@ Route::middleware([
     Route::get('/daily-actual-output', [DailyActualOutputController::class, 'index']);
     Route::get('/daily-actual-output/create', [DailyActualOutputController::class, 'create']);
     Route::get('/daily-actual-output/download_excel', [DailyActualOutputController::class, 'download_excel']);
+    Route::get('/daily-actual-output/download_actual', [DailyActualOutputController::class, 'download_actual']);
 
     Route::get('/dashboard',[DashboardController::class,'index']);
 });
