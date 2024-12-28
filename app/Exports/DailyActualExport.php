@@ -33,6 +33,7 @@ class DailyActualExport implements FromCollection, WithHeadings, WithStyles, Wit
     public function headings(): array
     {
         return [
+            'id',
             'Date',
             'Assembly Line',
             'PO',

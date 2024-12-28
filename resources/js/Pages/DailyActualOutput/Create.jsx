@@ -40,8 +40,9 @@ export default function Create(props) {
         }))
     );
 
+    // console.log('isi data awal',data);
         // Filter data based on MONTH
-    const filteredData = dailyPlanData.filter((element) => {
+    const filteredData = data?.filter((element) => {
         const isDateMatch = dateFilter ? new Date(element.date).toDateString() === new Date(dateFilter).toDateString() : true;
         const isMonthMatch = monthFilter
             ? new Date(element.date).getMonth() === new Date(monthFilter).getMonth() &&
@@ -180,16 +181,35 @@ export default function Create(props) {
             const workbook = XLSX.read(binaryStr, { type: "binary" });
             const sheetName = workbook.SheetNames[0];
             const sheet = workbook.Sheets[sheetName];
-    
-            // Konversi sheet menjadi JSON
+
+            // Convert sheet to JSON
             const importedData = XLSX.utils.sheet_to_json(sheet);
-    
-            // Ambil hanya data dari kolom "Total PRS Output"
-            const updatedData = importedData.map((row) => ({
-                total_prs_output: row["Total Prs_Output"], // pastikan nama kolom sesuai file Excel
-            }));
-    
-            setData(updatedData); // Update state dengan data yang diimpor
+            // console.log(importedData);
+
+            // Create a map of the imported data by ID for easy lookup
+            const importedDataMap = {};
+            importedData.forEach((row) => {
+                if (row.id) { // Ensure the row has an ID
+                    importedDataMap[row.id] = row["Total Prs_Output"]; // Adjust the key as necessary
+                }
+            });
+
+            // Update the existing data based on the imported data
+            const updatedData = data.map((row) => {
+                // Only update if the ID exists in the imported data
+                if (importedDataMap[row.id] !== undefined) {
+                    return {
+                        ...row,
+                        total_prs_output: importedDataMap[row.id], // Update the total_prs_output
+                    };
+                }
+                return row; // Return the original row if no match is found
+            });
+
+            // Set the updated data to state
+            setData(updatedData);
+
+            // console.log('Updated data:', updatedData);
             notifications.show({
                 title: "Import Successful",
                 message: "Data 'Total PRS Output' berhasil diimpor ke form!",
@@ -201,8 +221,8 @@ export default function Create(props) {
         };
         reader.readAsBinaryString(file);
     };
-    
-    
+
+
     const totalMixPrs = calculateTotalMixPrs();
     const totalMixPercentage = calculateTotalMixPercentage(totalMixPrs);
     const volume = calculateVolume();
