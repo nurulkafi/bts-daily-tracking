@@ -67,9 +67,9 @@ class DailyActualExport implements FromCollection, WithHeadings, WithStyles, Wit
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event) {
                 // Mengatur border untuk seluruh data
-                $event->sheet->getStyle('A1:F' . (count($this->data) + 1))->applyFromArray([
+                $event->sheet->getStyle('A1:G' . (count($this->data) + 1))->applyFromArray([
                     'borders' => [
                         'outline' => [
                             'borderStyle' => Border::BORDER_THIN,
@@ -83,12 +83,13 @@ class DailyActualExport implements FromCollection, WithHeadings, WithStyles, Wit
                 ]);
 
                 // Menyesuaikan lebar kolom
+                $event->sheet->getColumnDimension('A')->setWidth(5); // ID
                 $event->sheet->getColumnDimension('B')->setWidth(15); // Date
-                $event->sheet->getColumnDimension('A')->setWidth(20); // Assembly Line
-                $event->sheet->getColumnDimension('C')->setWidth(20); // PO
-                $event->sheet->getColumnDimension('D')->setWidth(15); // Total PRs
-                $event->sheet->getColumnDimension('E')->setWidth(15); // Total Output
-                $event->sheet->getColumnDimension('F')->setWidth(15); // Total Output
+                $event->sheet->getColumnDimension('C')->setWidth(20); // Assembky
+                $event->sheet->getColumnDimension('D')->setWidth(15); // PO
+                $event->sheet->getColumnDimension('E')->setWidth(15); // SIZE
+                $event->sheet->getColumnDimension('F')->setWidth(15); // Plan out
+                $event->sheet->getColumnDimension('G')->setWidth(15); // actual Output
             },
         ];
     }

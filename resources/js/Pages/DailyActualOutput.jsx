@@ -13,7 +13,7 @@ export default function DailyActualOutput(props) {
     const [assemblyLineFilter, setAssemblyLineFilter] = useState('');
     const [poFilter, setPoFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;  // Adjust the number of items per page here
+    const itemsPerPage = 15;  // Adjust the number of items per page here
 
     const dailyPlanData = props.data;
 
@@ -65,22 +65,22 @@ export default function DailyActualOutput(props) {
                 <Table.Td>{element.size}</Table.Td>
                 <Table.Td><Badge color='blue'>{element.total_prs}</Badge></Table.Td>
                 <Table.Td>
-                    <Badge color={element.total_prs_output < element.total_prs ? 'red' : 'green'}>{element.total_prs_output ?? 0}</Badge>
+                    <Badge color={element.total_prs_output < element.total_prs ? 'yellow' : 'yellow'}>{element.total_prs_output ?? 0}</Badge>
                 </Table.Td>
                 <Table.Td>
-                    <Badge color={element.total_prs_output < element.total_prs ? 'red' : 'green'}>{calculateMixMatching(element.total_prs, element.total_prs_output)}</Badge>
+                    <Badge color={element.total_prs_output < element.total_prs ? 'green' : 'green'}>{calculateMixMatching(element.total_prs, element.total_prs_output)}</Badge>
                 </Table.Td>
                 <Table.Td>
-                    <Badge color={element.total_prs_output < element.total_prs ? 'red' : 'green'}>{totalMixPrs}</Badge>
+                    <Badge color={element.total_prs_output < element.total_prs ? 'green' : 'green'}>{totalMixPrs}</Badge>
                 </Table.Td>
                 <Table.Td>
-                    <Badge color={element.total_prs_output < element.total_prs ? 'red' : 'green'}>{mixPercentage.toFixed(2)}%</Badge>
+                    <Badge color={element.total_prs_output < element.total_prs ? 'green' : 'green'}>{mixPercentage.toFixed(2)}%</Badge>
                 </Table.Td>
                 <Table.Td>
-                    <Badge color={element.total_prs_output < element.total_prs ? 'red' : 'green'}>{volume.toFixed(2)}%</Badge>
+                    <Badge color={element.total_prs_output < element.total_prs ? 'green' : 'green'}>{volume.toFixed(2)}%</Badge>
                 </Table.Td>
                 <Table.Td>
-                    <Badge color={element.total_prs_output < element.total_prs ? 'red' : 'green'}>{bts.toFixed(2)}</Badge>
+                    <Badge color={element.total_prs_output < element.total_prs ? 'green' : 'green'}>{bts.toFixed(2)}</Badge>
                 </Table.Td>
             </Table.Tr>
         );
@@ -225,7 +225,7 @@ export default function DailyActualOutput(props) {
             <Card withBorder shadow="sm" radius="md">
                 <Card.Section withBorder inheritPadding py="md">
                     <Group mt={10} mb={10} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Title order={3}>Daily Plan Data</Title>
+                        <Title order={3}>Build To Schedule Data</Title>
 
                         <Pagination
                             page={currentPage}
@@ -270,31 +270,32 @@ export default function DailyActualOutput(props) {
                                 <Table.Th></Table.Th>
                                 <Table.Th></Table.Th>
                                 <Table.Th></Table.Th>
-                                <Table.Th></Table.Th>
-                                <Table.Th style={{ textAlign: 'center' }}>
+                                <Table.Th colSpan={2} style={{ textAlign: 'center' }}>
                                     <Badge color="blue" size="lg">Daily Plan</Badge>
                                 </Table.Th>
+                                <Table.Th style={{ textAlign: 'center' }}>
+                                    <Badge color="yellow" size="lg">Actuual Output</Badge>
+                                </Table.Th>
                                 <Table.Th colSpan={5} style={{ textAlign: 'center' }}>
-                                    <Badge color="teal" size="lg">Daily Actual Output</Badge>
+                                    <Badge color="teal" size="lg">BTS Calculation</Badge>
                                 </Table.Th>
                                 <Table.Th></Table.Th>
                             </Table.Tr>
                             {/* Header kedua untuk subkategori */}
                             <Table.Tr>
-                                <Table.Th>#</Table.Th>
+                                <Table.Th>No</Table.Th>
                                 <Table.Th>Date</Table.Th>
                                 <Table.Th>Factory</Table.Th>
                                 <Table.Th>Assembly Line</Table.Th>
                                 <Table.Th>PO</Table.Th>
                                 <Table.Th>Size</Table.Th>
-                                <Table.Th>Total (PRS)</Table.Th>
-                                <Table.Th>Total (PRS)</Table.Th>
+                                <Table.Th>Total Plan (PRS)</Table.Th>
+                                <Table.Th>Total Actual (PRS)</Table.Th>
                                 <Table.Th>Mix Matching</Table.Th>
                                 <Table.Th>Total Mix (PRS)</Table.Th>
                                 <Table.Th>Mix %</Table.Th>
                                 <Table.Th>Volume %</Table.Th>
                                 <Table.Th>BTS %</Table.Th>
-                                <Table.Th>Udate</Table.Th>
                             </Table.Tr>
                         </Table.Thead>
                         <Table.Tbody>

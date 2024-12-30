@@ -26,15 +26,3 @@ createInertiaApp({
     },
 });
 
-// import React from 'react';
-// import { render } from 'react-dom';
-// import { createInertiaApp  } from '@inertiajs/react';
-// import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-
-// createInertiaApp({
-//     resolve: (name) => resolvePageComponent(`./Pages/${name}.jsx`, import.meta.glob('./Pages/**/*.jsx')),
-//     setup({ el, App, props }) {
-//         return render(<App {...props} />, el);
-//     },
-// });
-

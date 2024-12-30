@@ -228,7 +228,7 @@ export default function DailyPlan(props) {
                                 <Table.Tr>
                                     <Table.Td colSpan={7} style={{ textAlign: 'center', color: 'gray' }}>
                                         Data Not Found
-                                    </Table.Td>
+                                    </Table.Td> 
                                 </Table.Tr>
                             )}
                         </Table.Tbody>

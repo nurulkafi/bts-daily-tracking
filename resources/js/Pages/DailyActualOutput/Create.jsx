@@ -9,6 +9,7 @@ import {
     Notification,
     NumberInput,
     Table,
+    Select,
     TextInput,
     Title,
 } from "@mantine/core";
@@ -30,7 +31,7 @@ export default function Create(props) {
     const [assemblyLineFilter, setAssemblyLineFilter] = useState('');
     const [poFilter, setPoFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;  // Adjust the number of items per page here
+    const itemsPerPage = 20;  // Adjust the number of items per page here
 
     const dailyPlanData = props.data;
     const [data, setData] = useState(
@@ -48,7 +49,9 @@ export default function Create(props) {
             ? new Date(element.date).getMonth() === new Date(monthFilter).getMonth() &&
             new Date(element.date).getFullYear() === new Date(monthFilter).getFullYear()
             : true;
-        return isDateMatch && isMonthMatch;
+        const isAssemblyLineMatch = assemblyLineFilter ? element.assembly_line === assemblyLineFilter : true;
+        const isPoMatch = poFilter ? element.po === poFilter : true;
+        return isDateMatch && isMonthMatch && isAssemblyLineMatch && isPoMatch;
     });
 
     const handleTotalPrsOutputChange = (index, value) => {
@@ -221,7 +224,11 @@ export default function Create(props) {
         };
         reader.readAsBinaryString(file);
     };
+    // Get unique assembly lines for the Select options
+    const assemblyLines = [...new Set(dailyPlanData.map((element) => element.assembly_line))];
 
+    // Get unique po numbers for the Select options
+    const poNumbers = [...new Set(dailyPlanData.map((element) => element.po))];
 
     const totalMixPrs = calculateTotalMixPrs();
     const totalMixPercentage = calculateTotalMixPercentage(totalMixPrs);
@@ -303,7 +310,27 @@ export default function Create(props) {
                             radius={'md'}
                             onc
                         />
-                         <Button
+                         <Select
+                            value={assemblyLineFilter}
+                            onChange={(value) => setAssemblyLineFilter(value)}
+                            label="Filter by Assembly Line"
+                            data={assemblyLines}
+                            placeholder="Select assembly line"
+                            clearable
+                            radius={"md"}
+                        />
+                        <Select
+                            value={poFilter}
+                            onChange={(value) => setPoFilter(value)}
+                            label="Filter by PO"
+                            data={poNumbers}
+                            placeholder="Select PO"
+                            clearable
+                            radius={"md"}
+                        />
+                    </Group>
+                    <Group mt={20} mb={10} justify='flex-start'>
+                    <Button
                             onClick={() => {
                                 const params = new URLSearchParams();
 
@@ -327,10 +354,10 @@ export default function Create(props) {
                             color="teal"
                             leftSection={<IconFileExcel size="1rem" stroke={1.5} />}
                         >
-                            Download
+                            Export Data
                         </Button>
                         <Button component="label" leftSection={<IconFileExcel size={16} />} radius="md" color="green">
-                            Import Data Excel
+                            Import Data 
                             <input
                                 type="file"
                                 accept=".xlsx, .xls"
@@ -338,7 +365,7 @@ export default function Create(props) {
                                 hidden
                             />
                         </Button>
-                    </Group>
+                        </Group>
                 </Card.Section>
             </Card>
                 <CardSection withBorder inheritPadding py="md">
